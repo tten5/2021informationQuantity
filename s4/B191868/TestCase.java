@@ -71,6 +71,11 @@ public class TestCase {
 	    myObject.setTarget("abab".getBytes());
 	    freq = myObject.frequency();
 	    assert freq == 0: "SPACE IS NOT SET, abab: " + freq;
+	    // Case 7
+	    myObject.setSpace("ababab".getBytes());
+	    myObject.setTarget("c".getBytes());
+	    freq = myObject.frequency();
+	    assert freq == 0: "ababab, c: " + freq;
 	    
 	}
 	catch(Exception e) {
