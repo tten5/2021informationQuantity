@@ -72,10 +72,22 @@ public class Frequencer implements FrequencerInterface{
 
         // ここにコードを記述せよ 
         //                      
-        byte[] suffix_i = subByteExtract(mySpace, i, mySpace.length);
-        byte[] suffix_j = subByteExtract(mySpace, j, mySpace.length);
+        int len_i = mySpace.length - i; // length of suffix_i
+        int len_j = mySpace.length - j; // length of suffix_j
+        int index = 0; // index to check each character in suffix_i and suffix_j
 
-        return compareTwoString(suffix_i, suffix_j);                    
+        while (index < len_i && index < len_j) {
+            if (mySpace[i + index] > mySpace[j + index])
+                return 1;
+            if (mySpace[i + index] < mySpace[j + index])
+                return -1;
+            index++;
+        }
+        if (len_i > len_j)
+            return 1;
+        if (len_i < len_j)
+            return -1;
+        return 0;
     }
 
     private byte[] subByteExtract(byte[] x, int start, int end) {
@@ -183,6 +195,7 @@ public class Frequencer implements FrequencerInterface{
         int i = 0, j = 0; // i is for array L, j is for array R
         int k = l; // k is for merged array i.e the original array
         while (i < n1 && j < n2) {
+            // use suffixCompare to compare the corresponding suffix
             if (suffixCompare(L[i], R[j]) == -1 || suffixCompare(L[i], R[j]) == 0) {
                 arr[k] = L[i];
                 i++;
@@ -283,23 +296,24 @@ public class Frequencer implements FrequencerInterface{
         // ここに比較のコードを書け 
         //
 
-        int suffix_i_len = mySpace.length - i; // length of suffix_i
-        int target_len = k - j; // length of sub array of myTarget
-        byte[] suffix_i = subByteExtract(mySpace, i, mySpace.length);
-        byte[] target_j_k = subByteExtract(myTarget, j, k);
-        if (target_len > suffix_i_len || target_len == suffix_i_len) {
-            return compareTwoString(suffix_i, target_j_k);
+        int len_suffix_i = mySpace.length - i; // length of suffix_i
+        int len_target = k - j; // length of sub array of myTarget
+        int index = 0; // index to check each character in suffix_i and target_j_k
+
+        while (index < len_suffix_i && index < len_target) {
+            if (mySpace[i + index] > myTarget[j + index])
+                return 1;
+            if (mySpace[i + index] < myTarget[j + index])
+                return -1;
+            index++;
         }
-        if (target_len < suffix_i_len) { 
-        // this is the case where the behaviour is different from suffixCompare 
-            for (int x = 0; x < target_len; x++) {
-                if (suffix_i[x] > target_j_k[x])
-                    return 1;
-                if (suffix_i[x] < target_j_k[x])
-                    return -1;
-            }
-        }
-        return 0; 
+
+        // if the code reach this line, it means the first part of suffix_i is equal to target_j_k  
+        if (len_suffix_i < len_target)
+            return -1;
+        
+        // returns 0 if length of suffix_i >= length of target_j_k   
+        return 0;
     }
 
     private int subByteStartIndex(int start, int end) {
