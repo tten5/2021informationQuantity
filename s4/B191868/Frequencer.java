@@ -90,35 +90,6 @@ public class Frequencer implements FrequencerInterface{
         return 0;
     }
 
-    private byte[] subByteExtract(byte[] x, int start, int end) {
-        // return a copy of a sub array from array x  
-        // start from index "start"
-        // end in index "end"
-        byte[] result = new byte[end - start];
-        for (int i = 0; i < end - start; i++) {
-            result[i] = x[start + i];
-        }
-        return result;
-    }
-
-    private int compareTwoString(byte[] a, byte[] b) {
-        // compare two string in dictionary order
-        // return 0 if two string are the same
-        int i = 0;
-        while (i < a.length && i < b.length) {
-            if (a[i] > b[i])
-                return 1;
-            if (a[i] < b[i])
-                return -1;
-            i++;
-        }
-        if (a.length > b.length)
-            return 1;
-        if (a.length < b.length)
-            return -1;
-        return 0;
-    }
-
     public void setSpace(byte[] space) { 
         // suffixArrayの前処理は、setSpaceで定義せよ。
         mySpace = space; 
