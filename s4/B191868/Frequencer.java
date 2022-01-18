@@ -93,7 +93,13 @@ public class Frequencer implements FrequencerInterface{
     public void setSpace(byte[] space) { 
         // suffixArrayの前処理は、setSpaceで定義せよ。
         mySpace = space; 
-        if(mySpace.length > 0) spaceReady = true;
+        // I fix this part to add more checking for the space 
+        if (mySpace == null || mySpace.length < 1) {
+            spaceReady = false; // in case user do not init new Frequencer
+            return;
+        } else {
+            spaceReady = true;            
+        }
         // First, create unsorted suffix array.
         suffixArray = new int[space.length];
         // put all suffixes in suffixArray.
@@ -162,7 +168,6 @@ public class Frequencer implements FrequencerInterface{
             R[j] = arr[m + 1 + j];
 
         /* Merge the temp arrays and store value back to original array*/
-
         int i = 0, j = 0; // i is for array L, j is for array R
         int k = l; // k is for merged array i.e the original array
         while (i < n1 && j < n2) {
@@ -195,7 +200,14 @@ public class Frequencer implements FrequencerInterface{
     // ここから始まり、指定する範囲までは変更してはならないコードである。
 
     public void setTarget(byte [] target) {
-        myTarget = target; if(myTarget.length > 0) targetReady = true;
+        myTarget = target; 
+
+        // I fix this method to add more checking for the target 
+        if (myTarget == null || myTarget.length < 1) {
+            targetReady = false; // in case user do not init new Frequencer
+        } else {
+            targetReady = true;            
+        }
     }
 
     public int frequency() {
@@ -287,6 +299,44 @@ public class Frequencer implements FrequencerInterface{
         return 0;
     }
 
+    // Use binary search for searching the first index that is equal or greater than the target
+    private int searchFirst(int low, int high, int start, int end) {
+        if (high >= low) {
+            int mid = low + (high - low) / 2;
+            // if ((mid == 0 || target > arr[mid - 1]) && arr[mid] == target)
+            if ((mid == 0 || (targetCompare(suffixArray[mid - 1], start, end) == -1))
+                    && (targetCompare(suffixArray[mid], start, end) == 0))
+                return mid;
+            // else if (target > arr[mid])
+            else if (targetCompare(suffixArray[mid], start, end) == -1)
+                // search higher half of the arr
+                return searchFirst((mid + 1), high, start, end);
+            else
+                // search lower half of the arr
+                return searchFirst(low, (mid - 1), start, end);
+        }
+        return -1;
+    }
+
+    // Use binary search for searching the last index that is greater than the target
+    private int searchLast(int low, int high, int start, int end) {
+        if (high >= low) {
+            int mid = low + (high - low) / 2;
+            // if ((mid == n - 1 || target < arr[mid + 1]) && arr[mid] == target)
+            if ((mid == suffixArray.length - 1 || (targetCompare(suffixArray[mid + 1], start, end) == 1))
+                    && (targetCompare(suffixArray[mid], start, end) == 0))
+                return mid;
+            // else if (target < arr[mid])
+            else if (targetCompare(suffixArray[mid], start, end) == 1)
+                // search lower half of the arr
+                return searchLast(low, (mid - 1), start, end);
+            else
+                // search higher half of the arr
+                return searchLast((mid + 1), high, start, end);
+        }
+        return -1;
+    }
+
     private int subByteStartIndex(int start, int end) {
         //suffix arrayのなかで、目的の文字列の出現が始まる位置を求めるメソッド
         // 以下のように定義せよ。
@@ -317,7 +367,8 @@ public class Frequencer implements FrequencerInterface{
         //                                                                          
         // ここにコードを記述せよ。                                                 
         //                                                                         
-        return suffixArray.length; //このコードは変更しなければならない。       
+
+        return searchFirst(0, suffixArray.length - 1, start, end);       
     }
 
     private int subByteEndIndex(int start, int end) {
@@ -350,10 +401,11 @@ public class Frequencer implements FrequencerInterface{
         //　ここにコードを記述せよ                                           
         //                                                                   
         
-
-        return suffixArray.length; // この行は変更しなければならない、    
+        int result = searchLast(0, suffixArray.length - 1, start, end);
+        if (result == -1)
+            return result;
+        return result + 1; // because the finished position is the next position of the last one 
     }
-
 
     // Suffix Arrayを使ったプログラムのホワイトテストは、
     // privateなメソッドとフィールドをアクセスすることが必要なので、
@@ -372,16 +424,46 @@ public class Frequencer implements FrequencerInterface{
             frequencerObject = new Frequencer();
             frequencerObject.setSpace("ABC".getBytes());
             frequencerObject.printSuffixArray();
+            frequencerObject.setTarget("B".getBytes());
             
+            // **** Print out subByteStartIndex, and subByteEndIndex
+            int sub_start1 = frequencerObject.subByteStartIndex(0, frequencerObject.myTarget.length);
+            System.out.print("subByteStartIndex = " + sub_start1 + "; ");
+            int sub_end1 = frequencerObject.subByteEndIndex(0, frequencerObject.myTarget.length);
+            System.out.print("subByteEndIndex = " + sub_end1 + "; ");
+            int result1 = frequencerObject.frequency();
+            System.out.print("Freq = " + result1 + " ");
+            if(1 == result1) { System.out.println("OK"); } else {System.out.println("WRONG"); }
+
             // Test case 2: CBA
             frequencerObject = new Frequencer();
             frequencerObject.setSpace("CBA".getBytes());
             frequencerObject.printSuffixArray();
+            frequencerObject.setTarget("CB".getBytes());
+
+            // **** Print out subByteStartIndex, and subByteEndIndex
+            int sub_start2 = frequencerObject.subByteStartIndex(0, frequencerObject.myTarget.length);
+            System.out.print("subByteStartIndex = " + sub_start2 + "; ");
+            int sub_end2 = frequencerObject.subByteEndIndex(0, frequencerObject.myTarget.length);
+            System.out.print("subByteEndIndex = " + sub_end2 + "; ");
+            int result2 = frequencerObject.frequency();
+            System.out.print("Freq = " + result2 + " ");
+            if(1 == result2) { System.out.println("OK"); } else {System.out.println("WRONG"); }
 
             // Test case 3: HHH
             frequencerObject = new Frequencer();
             frequencerObject.setSpace("HHH".getBytes());
             frequencerObject.printSuffixArray();
+            frequencerObject.setTarget("H".getBytes());
+
+            // **** Print out subByteStartIndex, and subByteEndIndex
+            int sub_start3 = frequencerObject.subByteStartIndex(0, frequencerObject.myTarget.length);
+            System.out.print("subByteStartIndex = " + sub_start3 + "; ");
+            int sub_end3 = frequencerObject.subByteEndIndex(0, frequencerObject.myTarget.length);
+            System.out.print("subByteEndIndex = " + sub_end3 + "; ");
+            int result3 = frequencerObject.frequency();
+            System.out.print("Freq = " + result3 + " ");
+            if(3 == result3) { System.out.println("OK"); } else {System.out.println("WRONG"); }
 
             // Test case 4: Hi Ho Hi Ho
             frequencerObject = new Frequencer();
@@ -402,13 +484,14 @@ public class Frequencer implements FrequencerInterface{
             */
 
             frequencerObject.setTarget("H".getBytes());
-            //                                         
             // ****  Please write code to check subByteStartIndex, and subByteEndIndex
-            //
-
-            int result = frequencerObject.frequency();
-            System.out.print("Freq = "+ result+" ");
-            if(4 == result) { System.out.println("OK"); } else {System.out.println("WRONG"); }
+            int sub_start4 = frequencerObject.subByteStartIndex(0, frequencerObject.myTarget.length);
+            System.out.print("subByteStartIndex = " + sub_start4 + "; ");
+            int sub_end4 = frequencerObject.subByteEndIndex(0, frequencerObject.myTarget.length);
+            System.out.print("subByteEndIndex = " + sub_end4 + "; ");
+            int result4 = frequencerObject.frequency();
+            System.out.print("Freq = " + result4 + " ");
+            if(4 == result4) { System.out.println("OK"); } else {System.out.println("WRONG"); }
         }
         catch(Exception e) {
             System.out.println("Error occurs: " + e);
