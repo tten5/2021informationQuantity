@@ -21,7 +21,6 @@ public interface InformationEstimatorInterface {
 
 public class InformationEstimator implements InformationEstimatorInterface {
     static boolean debugMode = false;
-    // Code to test, *warning: This code is slow, and it lacks the required test
     byte[] myTarget; // data to compute its information quantity
     byte[] mySpace;  // Sample space to compute the probability
     FrequencerInterface myFrequencer;  // Object for counting frequency
@@ -68,7 +67,7 @@ public class InformationEstimator implements InformationEstimatorInterface {
         // Returns Double.MAX_VALUE when the true value is infinite, or SPACE is not set
         if(mySpace == null || mySpace.length == 0)  { return Double.MAX_VALUE; }
 
-	    if(debugMode) { showVariables(); }
+        if(debugMode) { showVariables(); }
 //        if(debugMode) { System.out.printf("np=%d length=%d ", np, +myTarget.length); }
 //        System.out.println("");
 
